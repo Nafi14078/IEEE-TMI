@@ -1,0 +1,63 @@
+% IEEE Transactions on Medical Imaging — SKELETON ONLY.
+% Replace this preamble with the OFFICIAL TMI template from the IEEE Author Center before submission.
+% The team writes every sentence of the manuscript in its own words (portal task 14).
+\documentclass[journal,twoside,web]{IEEEtran}
+\usepackage{amsmath,amssymb,graphicx,booktabs,cite}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+\title{When to Trust the Teacher: Reliability-Weighted Distillation of a Medical Vision-Language
+Foundation Model into a Compact Skin-Lesion Classifier under Label Scarcity}
+\author{% TODO: agreed author list and affiliations (KICKOFF_DECISIONS.md #1)
+}
+\maketitle
+
+\begin{abstract}
+% TODO (write last, <= 250 words): problem, method, data, key numbers from results/, conclusion.
+\end{abstract}
+\begin{IEEEkeywords}
+% TODO: e.g. knowledge distillation, vision-language models, dermoscopy, semi-supervised learning, selective prediction
+\end{IEEEkeywords}
+
+\section{Introduction}
+% Goal: why compact models + few labels; why foundation teachers are attractive but sometimes wrong;
+% the question "when to trust the teacher"; contributions as a bullet list (backed by the novelty search).
+
+\section{Related Work}
+% Goal: medical VLMs; knowledge distillation; semi-supervised/pseudo-labelling; uncertainty from
+% prompt ensembles / test-time augmentation; selective prediction in dermatology.
+
+\section{Method}
+\subsection{Problem setting}
+% Labelled set, unlabelled set, C classes, frozen teacher, compact student.
+\subsection{Zero-shot teacher targets}
+% K prompt paraphrase sets, A augmented views, calibration on labelled images (reliability.py).
+\subsection{Label-free teacher reliability}
+% Prompt agreement and augmentation agreement (generalised JS divergence), combination, rank weights.
+\subsection{Reliability-weighted distillation and abstention}
+% Loss = CE + lambda * weighted KD + mu * reliability-head BCE; abstention at test time.
+
+\section{Experiments}
+\subsection{Datasets and protocol}   % splits.csv, label fractions, seeds, external set
+\subsection{Baselines}
+\subsection{Implementation details}  % configs/default.yaml; compute; code availability
+\subsection{Metrics and statistics}
+
+\section{Results}
+\subsection{Does reliability predict teacher correctness?}  % check_reliability.py
+\subsection{Main comparison}                                % Table from make_tables.py
+\subsection{External smartphone test}
+\subsection{Selective prediction}
+\subsection{Ablations}
+
+\section{Discussion}
+% What worked, what did not, limitations (data overlap, class mapping, domain shift), future work (federated).
+
+\section{Conclusion}
+
+\section*{Acknowledgment}
+% Funding; and the AI-use disclosure required by IEEE policy (see AI_USE_DISCLOSURE.md).
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+\end{document}

@@ -1,0 +1,12 @@
+# Pre-submission checklist
+- [ ] splits.csv frozen and committed before test numbers were seen
+- [ ] no hyper-parameter or prompt chosen on test or external data
+- [ ] every table/figure regenerated from `results/` by scripts on the final code commit
+- [ ] 3 seeds for every cell; std and paired bootstrap reported
+- [ ] baselines got the same tuning budget as ours
+- [ ] negative / mixed results reported (e.g. where reliability weighting does not help)
+- [ ] limitations: teacher pre-training data overlap, class mapping BKL↔SEK, dermoscopy vs smartphone shift, small external set
+- [ ] every reference opened and checked (authors, year, venue, DOI, claim)
+- [ ] dataset and model licences + required citations included
+- [ ] AI-use disclosure written per current IEEE policy
+- [ ] TMI template, page limit, figure resolution, author info, code availability statement

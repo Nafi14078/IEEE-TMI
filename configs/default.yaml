@@ -1,0 +1,54 @@
+# Defaults for every run. Override on the command line: --set method=rwkd data.label_fraction=1
+method: rwkd            # supervised | kd_logit | kd_embed | pseudo_label | rwkd (ours)
+tag: ""                 # prefix for ablation runs
+out_dir: runs
+
+data:
+  csv: data/splits/splits.csv
+  image_root: data/processed
+  classes: [MEL, NV, BCC, AK, BKL, SCC]   # FROZEN at kickoff; shared by ISIC 2019 and PAD-UFES-20
+  label_fraction: 5     # 1 | 5 | 10 (% of training images that keep their label)
+  split_seed: 0         # which labelled subset (0,1,2); tie to train.seed
+  img_size: 224
+  num_workers: 8
+
+teacher:
+  cache: cache/biomedclip.pt
+  extra_caches: []      # e.g. [cache/derm_teacher.pt] for the optional dermatology teacher
+  target: zeroshot      # zeroshot | probe
+  calibrate: temperature   # none | temperature | temperature_bias (fit on labelled images only)
+  probe_balanced: false
+  kd_temperature: 2.0
+
+reliability:
+  components: [prompt, aug]   # any of prompt, aug, teacher, conf
+  agreement: jsd              # jsd | vote
+  combine: product            # product | geomean | mean
+  transform: rank             # rank | raw | power
+  power: 1.0
+
+student:
+  arch: resnet18        # resnet18 | mobilenetv3_large_100 (timm names)
+  pretrained: true      # ImageNet weights
+  rel_head: true        # student learns reliability -> can abstain
+  rel_detach: false
+
+loss:
+  lambda_kd: 1.0
+  mu_rel: 0.5
+  pl_threshold: 0.7
+  ce_class_weights: true
+  rampup_frac: 0.1
+
+train:
+  steps: 6000
+  batch_labelled: 32
+  batch_unlabelled: 64
+  batch_eval: 128
+  lr: 0.0005
+  weight_decay: 0.05
+  warmup_steps: 300
+  amp: true
+  log_every: 100
+  save_ckpt: true
+  seed: 0

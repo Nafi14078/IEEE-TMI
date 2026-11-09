@@ -1,0 +1,16 @@
+data/raw/
+data/processed/
+cache/
+runs/
+*.pt
+*.npz
+__pycache__/
+*.egg-info/
+.ipynb_checkpoints/
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.pdf
+paper/*.bbl
+paper/*.blg
+# data/splits/splits.csv IS committed: the frozen protocol must be shared.
