@@ -49,6 +49,8 @@ paper/                      IEEE TMI LaTeX skeleton (headings only — the team 
 Evaluation: in-distribution test (ISIC 2019, lesion-grouped split) and **external** smartphone set (PAD-UFES-20); 1 / 5 / 10 % labels; 3 seeds (each seed also re-draws the labelled subset); balanced accuracy, macro-F1, macro-AUROC, ECE, and selective prediction (risk–coverage, AURC).
 
 ## Quick start
+**No NVIDIA GPU? Use Kaggle: see [docs/KAGGLE.md](docs/KAGGLE.md) and the notebooks in `kaggle/`.**
+
 ```bash
 pip install -r requirements.txt && pip install -e .
 pytest -q tests                                   # sanity

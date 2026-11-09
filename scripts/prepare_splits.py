@@ -31,9 +31,18 @@ def isic_table(gt_csv, meta_csv, img_dir, classes):
     meta = pd.read_csv(meta_csv)[["image", "lesion_id"]]
     gt = gt.merge(meta, on="image", how="left")
     gt["group"] = gt["lesion_id"].fillna(gt["image"])
+    files = {}  # search recursively: Kaggle copies of ISIC 2019 use different folder layouts
+    for root, _, fs in os.walk(img_dir):
+        for f in fs:
+            if f.lower().endswith((".jpg", ".jpeg", ".png")):
+                files.setdefault(f.rsplit(".", 1)[0], os.path.join(root, f))
+    missing = [i for i in gt["image"] if i not in files]
+    if missing:
+        print(f"WARNING: {len(missing)} ISIC images not found, e.g. {missing[:3]}")
+        gt = gt[~gt["image"].isin(missing)]
     return pd.DataFrame({
         "image_id": gt["image"], "dataset": "isic2019",
-        "src_path": [os.path.join(img_dir, f"{i}.jpg") for i in gt["image"]],
+        "src_path": [files[i] for i in gt["image"]],
         "path": [f"isic2019/{i}.jpg" for i in gt["image"]],
         "label_name": gt["label_name"], "group": "isic_" + gt["group"].astype(str)})
 
