@@ -29,7 +29,7 @@ def main():
     for target in ("zeroshot", "probe"):
         cfg["teacher"]["target"] = target
         if target == "probe":  # no prompts for the probe: only augmentation agreement exists
-            cfg["reliability"]["components"] = ["aug"]
+            cfg["reliability"]["components"] = [c for c in cfg["reliability"]["components"] if c != "prompt"] or ["aug"]
         tt = build_teacher_targets(cfg, df, lab, idx["train"], y)
         name = f"teacher_{target}_lab{frac}_s{seed}"
         out_dir = os.path.join(cfg.get("out_dir", "runs"), name)

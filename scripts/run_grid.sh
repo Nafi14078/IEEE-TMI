@@ -27,15 +27,15 @@ if [[ $WHAT == ablation || $WHAT == all ]]; then
   # ResNet-18, 5% labels, 3 seeds. Each ablation gets its own tag so tables keep them apart.
   for s in $SEEDS; do
     common="method=rwkd student.arch=resnet18 data.label_fraction=5 data.split_seed=$s train.seed=$s"
-    python -m rwkd.train --config $CFG --set $common tag=abl_promptonly "reliability.components=[prompt]"
     python -m rwkd.train --config $CFG --set $common tag=abl_augonly "reliability.components=[aug]"
     python -m rwkd.train --config $CFG --set $common tag=abl_confonly "reliability.components=[conf]"
     python -m rwkd.train --config $CFG --set $common tag=abl_rawweights reliability.transform=raw
     python -m rwkd.train --config $CFG --set $common tag=abl_vote reliability.agreement=vote
     python -m rwkd.train --config $CFG --set $common tag=abl_norelhead student.rel_head=false
-    python -m rwkd.train --config $CFG --set $common tag=abl_uncalibrated teacher.calibrate=none
-    python -m rwkd.train --config $CFG --set $common tag=abl_probeteacher teacher.target=probe "reliability.components=[aug]"
+    python -m rwkd.train --config $CFG --set $common tag=abl_probeunbalanced teacher.probe_balanced=false
+    python -m rwkd.train --config $CFG --set $common tag=abl_zeroshot teacher.target=zeroshot
+    python -m rwkd.train --config $CFG --set $common tag=abl_zeroshot_promptaug teacher.target=zeroshot "reliability.components=[prompt,aug]"
     # Optional second teacher (only after its weights + licence are confirmed):
-    # python -m rwkd.train --config $CFG --set $common tag=abl_2teachers "teacher.extra_caches=[cache/derm_teacher.pt]" "reliability.components=[prompt,aug,teacher]"
+    # python -m rwkd.train --config $CFG --set $common tag=abl_2teachers "teacher.extra_caches=[cache/derm_teacher.pt]" "reliability.components=[aug,conf,teacher]"
   done
 fi

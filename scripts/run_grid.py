@@ -17,15 +17,15 @@ import time
 from contextlib import contextmanager
 
 METHODS = ["supervised", "kd_logit", "kd_embed", "pseudo_label", "rwkd"]
-ABLATIONS = {
-    "abl_promptonly": ["reliability.components=[prompt]"],
+ABLATIONS = {  # Option B: probe teacher, reliability = aug x conf. Each line removes or swaps one piece.
     "abl_augonly": ["reliability.components=[aug]"],
     "abl_confonly": ["reliability.components=[conf]"],
     "abl_rawweights": ["reliability.transform=raw"],
     "abl_vote": ["reliability.agreement=vote"],
     "abl_norelhead": ["student.rel_head=false"],
-    "abl_uncalibrated": ["teacher.calibrate=none"],
-    "abl_probeteacher": ["teacher.target=probe", "reliability.components=[aug]"],
+    "abl_probeunbalanced": ["teacher.probe_balanced=false"],
+    "abl_zeroshot": ["teacher.target=zeroshot"],  # zero-shot teacher, same aug x conf reliability
+    "abl_zeroshot_promptaug": ["teacher.target=zeroshot", "reliability.components=[prompt,aug]"],  # original proposal
 }
 
 

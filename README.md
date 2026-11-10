@@ -4,9 +4,11 @@
 Target: *IEEE Transactions on Medical Imaging* (TMI). Submit by **31 Dec 2026**.
 
 ## Idea in one paragraph
-A frozen, openly licensed medical vision-language model (**BiomedCLIP**; optional second teacher: a dermatology-specific CLIP) labels every training image zero-shot. The labels are only partly right. For each image we measure **without labels** how much to trust the teacher:
-- **prompt agreement**: do K paraphrased text prompts give the same answer?
+A frozen, openly licensed medical vision-language model (**BiomedCLIP**) is the teacher. **Method as approved (Option B, after the go/no-go check):** the teacher is the frozen BiomedCLIP image encoder plus a linear probe fitted on the labelled images only. Its labels on the unlabelled images are only partly right, so for each image we measure **without labels** how much to trust it:
 - **augmentation agreement**: do A augmented views of the image give the same answer?
+- **confidence**: how peaked is the teacher's averaged prediction?
+
+*Change from the proposal:* zero-shot BiomedCLIP was too weak on dermoscopy (val. balanced accuracy 0.27–0.30), and **prompt-paraphrase agreement did not predict teacher correctness** (AUROC 0.37–0.45). This is kept as an ablation and reported as a finding. With the probe teacher, augmentation agreement × confidence reaches AUROC 0.74 at 5 % labels and 0.72 at 1 % (`scripts/check_reliability.py`).
 
 The compact **student** (ResNet-18 or MobileNetV3-Large) learns from the 1–10 % labelled images (cross-entropy) and from the teacher on all images, with each image's distillation term **weighted by that reliability**. A small extra head learns to **predict the reliability**, so the student can **abstain** at test time. Teacher embeddings are computed **once**, so every run fits a modest GPU.
 

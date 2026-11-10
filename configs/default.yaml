@@ -15,15 +15,15 @@ data:
 teacher:
   cache: cache/biomedclip.pt
   extra_caches: []      # e.g. [cache/derm_teacher.pt] for the optional dermatology teacher
-  target: zeroshot      # zeroshot | probe
-  calibrate: temperature   # none | temperature | temperature_bias (fit on labelled images only)
+  target: probe         # probe (DEFAULT, Option B approved by mentor) | zeroshot (ablation / baseline)
+  calibrate: temperature_bias   # zero-shot only: none | temperature | temperature_bias (fit on labelled images)
   calibrate_balanced: true # class-balanced calibration loss (unbalanced collapses onto NV)
   probe_balanced: true     # class-balanced linear probe
   probe_C: cv              # cv (chosen on labelled images by stratified CV) or a number
   kd_temperature: 2.0
 
 reliability:
-  components: [prompt, aug]   # any of prompt, aug, teacher, conf
+  components: [aug, conf]     # DEFAULT (Option B). Any of prompt (zero-shot only), aug, teacher, conf
   agreement: jsd              # jsd | vote
   combine: product            # product | geomean | mean
   transform: rank             # rank | raw | power
