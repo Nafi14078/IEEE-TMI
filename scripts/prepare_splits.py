@@ -32,7 +32,7 @@ def isic_table(gt_csv, meta_csv, img_dir, classes):
     gt = gt.merge(meta, on="image", how="left")
     gt["group"] = gt["lesion_id"].fillna(gt["image"])
     files = {}  # search recursively: Kaggle copies of ISIC 2019 use different folder layouts
-    for root, _, fs in os.walk(img_dir):
+    for root, _, fs in os.walk(img_dir, followlinks=True):
         for f in fs:
             if f.lower().endswith((".jpg", ".jpeg", ".png")):
                 files.setdefault(f.rsplit(".", 1)[0], os.path.join(root, f))
@@ -50,7 +50,7 @@ def isic_table(gt_csv, meta_csv, img_dir, classes):
 def pad_table(meta_csv, img_dir, classes):
     meta = pd.read_csv(meta_csv)
     files = {}
-    for root, _, fs in os.walk(img_dir):
+    for root, _, fs in os.walk(img_dir, followlinks=True):
         for f in fs:
             files[f] = os.path.join(root, f)
     meta["label_name"] = meta["diagnostic"].map(PAD_TO_ISIC)
