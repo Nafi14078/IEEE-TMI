@@ -5,7 +5,7 @@ mkdir -p data/raw/isic2019 data/raw/pad_ufes20
 cd data/raw/isic2019
 # ISIC 2019 challenge training data (~9 GB), CC BY-NC. Source page: https://challenge.isic-archive.com/data/#2019
 for f in ISIC_2019_Training_Input.zip ISIC_2019_Training_GroundTruth.csv ISIC_2019_Training_Metadata.csv; do
-  [[ -f $f ]] || wget -c "https://isic-challenge-data.s3.amazonaws.com/2019/$f"
+  [[ -f $f ]] || wget -c "https://isic-archive.s3.amazonaws.com/challenges/2019/$f"
 done
 [[ -d ISIC_2019_Training_Input ]] || unzip -q ISIC_2019_Training_Input.zip
 cd ../pad_ufes20

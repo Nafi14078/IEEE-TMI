@@ -7,7 +7,7 @@ import os
 import urllib.request
 import zipfile
 
-BASE = "https://isic-challenge-data.s3.amazonaws.com/2019/"
+BASE = "https://isic-archive.s3.amazonaws.com/challenges/2019/"
 FILES = ["ISIC_2019_Training_GroundTruth.csv", "ISIC_2019_Training_Metadata.csv", "ISIC_2019_Training_Input.zip"]
 OUT = os.path.join("data", "raw", "isic2019")
 

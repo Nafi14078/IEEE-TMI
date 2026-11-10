@@ -26,6 +26,10 @@ DEFAULT_CLASSES = ["MEL", "NV", "BCC", "AK", "BKL", "SCC"]  # classes shared by 
 
 def isic_table(gt_csv, meta_csv, img_dir, classes):
     gt = pd.read_csv(gt_csv)
+    if not set(ISIC_COLS) <= set(gt.columns):
+        raise SystemExit(f"{gt_csv} is not the ISIC 2019 ground-truth CSV (columns: {list(gt.columns)[:5]}). "
+                         "Delete it and download it again from "
+                         "https://isic-archive.s3.amazonaws.com/challenges/2019/ISIC_2019_Training_GroundTruth.csv")
     gt["label_name"] = gt[ISIC_COLS].idxmax(axis=1)
     gt = gt[gt["label_name"].isin(classes)].copy()
     meta = pd.read_csv(meta_csv)[["image", "lesion_id"]]
