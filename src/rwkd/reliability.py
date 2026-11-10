@@ -50,17 +50,24 @@ def zeroshot_logits(cache, temperature=1.0, bias=None):
     return logits + bias if bias is not None else logits
 
 
-def fit_calibration(logits, y, use_bias=False, iters=200):
-    """Fit a temperature (and optional per-class bias) on the *labelled* images only."""
+def fit_calibration(logits, y, use_bias=False, iters=200, balanced=True):
+    """Fit a temperature (and optional per-class bias) on the *labelled* images only.
+    balanced=True weights every class equally (matches balanced accuracy); without it the
+    bias learns the class prior and collapses onto the majority class (NV)."""
     logT = torch.zeros((), requires_grad=True)
     b = torch.zeros(logits.shape[-1], requires_grad=use_bias)
     params = [logT] + ([b] if use_bias else [])
+    C = logits.shape[-1]
+    w = None
+    if balanced:
+        counts = torch.bincount(y, minlength=C).float().clamp_min(1)
+        w = counts.sum() / (C * counts)
     opt = torch.optim.LBFGS(params, lr=0.1, max_iter=iters, line_search_fn="strong_wolfe")
 
     def closure():
         opt.zero_grad()
         p = torch.softmax(logits / logT.exp() + b, -1).mean((1, 2))
-        loss = F.nll_loss(torch.log(p.clamp_min(1e-8)), y) + 1e-3 * (b ** 2).sum()
+        loss = F.nll_loss(torch.log(p.clamp_min(1e-8)), y, weight=w) + 1e-3 * (b ** 2).sum()
         loss.backward()
         return loss
 
@@ -68,17 +75,32 @@ def fit_calibration(logits, y, use_bias=False, iters=200):
     return float(logT.detach().exp()), (b.detach() if use_bias else None)
 
 
-def probe_probs(cache, labelled_idx, y, C, balanced=False, C_reg=1.0):
-    """Teacher's own linear probe (logistic regression on view-0 embeddings of labelled images),
+def probe_probs(cache, labelled_idx, y, C, balanced=True, C_reg="cv"):
+    """Teacher's own linear probe: standardised view-0 embeddings of the labelled images ->
+    logistic regression (class-balanced; C chosen by stratified CV on the labelled images only),
     applied to every view -> [N, A, 1, C]."""
-    from sklearn.linear_model import LogisticRegression
+    from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
     emb = cache["img_emb"].float().numpy()
     N, A, D = emb.shape
-    clf = LogisticRegression(max_iter=5000, C=C_reg, class_weight="balanced" if balanced else None)
-    clf.fit(emb[labelled_idx, 0], y[labelled_idx].numpy())
+    X, yl = emb[labelled_idx, 0], y[labelled_idx].numpy()
+    cw = "balanced" if balanced else None
+    if C_reg == "cv":
+        folds = int(min(5, np.bincount(yl).min()))
+        if folds >= 2:
+            lr = LogisticRegressionCV(Cs=[0.001, 0.01, 0.1, 1.0, 10.0], cv=StratifiedKFold(folds, shuffle=True, random_state=0),
+                                      scoring="balanced_accuracy", class_weight=cw, max_iter=5000)
+        else:
+            lr = LogisticRegression(C=0.1, class_weight=cw, max_iter=5000)
+    else:
+        lr = LogisticRegression(C=float(C_reg), class_weight=cw, max_iter=5000)
+    clf = make_pipeline(StandardScaler(), lr).fit(X, yl)
     out = np.zeros((N * A, C), dtype=np.float32)
     out[:, clf.classes_] = clf.predict_proba(emb.reshape(N * A, D))
-    return torch.from_numpy(out).view(N, A, 1, C)
+    chosen = getattr(clf[-1], "C_", [getattr(clf[-1], "C", None)])
+    return torch.from_numpy(out).view(N, A, 1, C), {"probe_C": float(np.ravel(chosen)[0])}
 
 
 def teacher_probs(cache, mode, labelled_idx, y, tcfg):
@@ -89,11 +111,13 @@ def teacher_probs(cache, mode, labelled_idx, y, tcfg):
             return torch.softmax(zeroshot_logits(cache), -1), {"temperature": 1.0}
         logits = zeroshot_logits(cache)
         temp, bias = fit_calibration(logits[labelled_idx], y[labelled_idx],
-                                     use_bias=(cal == "temperature_bias"))
+                                     use_bias=(cal == "temperature_bias"),
+                                     balanced=tcfg.get("calibrate_balanced", True))
         return torch.softmax(logits / temp + (bias if bias is not None else 0.0), -1), \
             {"temperature": temp, "bias": None if bias is None else bias.tolist()}
     if mode == "probe":
-        return probe_probs(cache, labelled_idx, y, C, balanced=tcfg.get("probe_balanced", False)), {}
+        return probe_probs(cache, labelled_idx, y, C, balanced=tcfg.get("probe_balanced", True),
+                           C_reg=tcfg.get("probe_C", "cv"))
     raise ValueError(mode)
 
 

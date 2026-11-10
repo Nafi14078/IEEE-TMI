@@ -17,7 +17,9 @@ teacher:
   extra_caches: []      # e.g. [cache/derm_teacher.pt] for the optional dermatology teacher
   target: zeroshot      # zeroshot | probe
   calibrate: temperature   # none | temperature | temperature_bias (fit on labelled images only)
-  probe_balanced: false
+  calibrate_balanced: true # class-balanced calibration loss (unbalanced collapses onto NV)
+  probe_balanced: true     # class-balanced linear probe
+  probe_C: cv              # cv (chosen on labelled images by stratified CV) or a number
   kd_temperature: 2.0
 
 reliability:
